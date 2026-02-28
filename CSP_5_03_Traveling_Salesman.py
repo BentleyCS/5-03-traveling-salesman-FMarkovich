@@ -5,9 +5,15 @@ import pygame
 import itertools
 
 def getPathDistance(places : list):
-    #Given a list of x,y coordinates return the distance it would take to go to each coordinate
-    # in order and then back to the start.
-    dist = 0
+    if len(places) < 2:
+        return 0.0
+    dist = 0.0
+    for i in range(len(places) - 1):
+        x1, y1 = places[i]
+        x2, y2 = places[i + 1]
+        dist += math.dist((x1, y1), (x2, y2))
+    dist += math.dist(places[-1], places[0])
+
     return dist
 
 
@@ -15,10 +21,23 @@ def full_TSP(places : list):
     #Check the distance of all possible different paths one could take over a set of x,y coordiantes
     #and return the path with the shotest distance
     #Print out the number of distance calculations you had to do.
-
     bestRoute = []
     calculations = 0
+    shortest_dist = float("inf")
 
+    for perm in itertools.permutations(places):
+        total = 0.0
+
+        for i in range(len(perm) - 1):
+            total += math.dist(perm[i], perm[i + 1])
+
+        total += math.dist(perm[-1], perm[0])
+
+        calculations += 1
+
+        if total < shortest_dist:
+            shortest_dist = total
+            bestRoute = perm
     print(f"there were {calculations} calculations for full TSP")
     return bestRoute
 
@@ -27,11 +46,33 @@ def hueristic_TSP(places : list):
     #For each node find the closest node to it and assume it is next node then repeat until you have your path.
     #Return the path. andprint out the number of distance calculations you did.
 
+    if not places:
+        return [], 0
 
-    calculations = 0
+    unvisited = places[1:]
+    path = [places[0]]
+    distance_calculations = 0
 
-    print(f"there were {calculations} calculations for hueristic TSP")
-    return []
+    current = places[0]
+
+    while unvisited:
+        nearest = None
+        nearest_dist = float("inf")
+
+        for point in unvisited:
+            distance_calculations += 1
+            d = math.dist(current, point)
+
+            if d < nearest_dist:
+                nearest_dist = d
+                nearest = point
+
+        path.append(nearest)
+        unvisited.remove(nearest)
+        current = nearest
+
+    print(f"Distance calculations performed: {distance_calculations}")
+    return path
 
 def generatePermutations(places : list):
     # a function that given a list will return all possible permutations of the list.
